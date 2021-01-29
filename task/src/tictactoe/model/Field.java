@@ -1,20 +1,31 @@
 package tictactoe.model;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
-import static tictactoe.consts.GameConstants.*;
+import static tictactoe.constant.Constants.*;
 
 public class Field {
 
     private final char[] chars;
 
-    private int fillingLevel;
+    private int currentLevel;
+
+    private final int idxOffsetByRows = 1;
+
+    private final int idxOffsetByCols = FIELD_SIZE;
+
+    private final int mainDiagStartIdx = 0;
+
+    private final int mainDiagIdxOffset = 4;
+
+    private final int sideDiagStartIdx = 2;
+
+    private final int sideDiagIdxOffset = 2;
 
     public Field() {
 
         chars = new char[FIELD_SIZE * FIELD_SIZE];
-
-        fillingLevel = 0;
 
         charsInit();
 
@@ -24,7 +35,7 @@ public class Field {
 
         Arrays.fill(chars, SPACE);
 
-        fillingLevel = 0;
+        currentLevel = 0;
 
     }
 
@@ -38,7 +49,7 @@ public class Field {
 
         chars[idx] = ch;
 
-        fillingLevel++;
+        currentLevel++;
 
     }
 
@@ -46,7 +57,7 @@ public class Field {
 
         chars[idx] = SPACE;
 
-        fillingLevel--;
+        currentLevel--;
 
     }
 
@@ -56,17 +67,17 @@ public class Field {
 
     }
 
-    public int getFillingLevel() {
+    public int getCurrentLevel() {
 
-        return fillingLevel;
+        return currentLevel;
 
     }
 
     public String status() {
 
-        int minCheckingLevel = 5;
+        int minGameOverLevel = 6;
 
-        if (fillingLevel < minCheckingLevel) {
+        if (currentLevel < minGameOverLevel) {
 
             return GAME_NOT_FINISHED;
 
@@ -76,7 +87,7 @@ public class Field {
 
         boolean isWinsO = hasCompleteMatchByRowsAndCols(O) || hasCompleteMatchByDiagonals(O);
 
-        if (!isWinsX && !isWinsO && fillingLevel == FIELD_SIZE * FIELD_SIZE) {
+        if (!isWinsX && !isWinsO && currentLevel == FIELD_SIZE * FIELD_SIZE) {
 
             return DRAW;
 
@@ -96,125 +107,38 @@ public class Field {
 
     private boolean hasCompleteMatchByRowsAndCols(char ch) {
 
-        int rowIdxOffset = 1;
-
-        for (int startIdx = 0; startIdx < chars.length; startIdx += FIELD_SIZE) {
-
-            if (isCompleteMatch(startIdx, rowIdxOffset, ch)) {
-
-                return true;
-
-            }
-
-        }
-
-        for (int startIdx = 0; startIdx < FIELD_SIZE; startIdx++) {
-
-            if (isCompleteMatch(startIdx, FIELD_SIZE, ch)) {
-
-                return true;
-
-            }
-
-        }
-
-        return false;
-
-    }
-
-    private boolean hasCompleteMatchByDiagonals(char ch) {
-
-        int mainDiagStartIdx = 0;
-
-        int mainDiagOffset = 4;
-
-        boolean isCompleteMatchByMainDiag = isCompleteMatch(mainDiagStartIdx, mainDiagOffset, ch);
-
-        if (isCompleteMatchByMainDiag) {
+        if (Stream.iterate(0, i -> i + FIELD_SIZE)
+                  .limit(FIELD_SIZE)
+                  .allMatch(i -> hasCompleteMatch(i, idxOffsetByRows, ch))) {
 
             return true;
 
         }
 
-        int sideDiagStartIdx = 2;
-
-        int sideDiagOffset = 2;
-
-        return isCompleteMatch(sideDiagStartIdx, sideDiagOffset, ch);
+        return Stream.iterate(0, i -> i + 1)
+                     .limit(FIELD_SIZE)
+                     .allMatch(i -> hasCompleteMatch(i, idxOffsetByCols, ch));
 
     }
 
-    private boolean isCompleteMatch(int startIdx, int offset, char ch) {
+    private boolean hasCompleteMatchByDiagonals(char ch) {
+
+        return hasCompleteMatch(mainDiagStartIdx, mainDiagIdxOffset, ch) ||
+               hasCompleteMatch(sideDiagStartIdx, sideDiagIdxOffset, ch);
+
+    }
+
+    private boolean hasCompleteMatch(int startIdx, int idxOffset, char ch) {
 
         return chars[startIdx] == ch &&
-               chars[startIdx + offset] == ch &&
-               chars[startIdx + offset + offset] == ch;
+               chars[startIdx + idxOffset] == ch &&
+               chars[startIdx + 2 * idxOffset] == ch;
 
     }
 
-    public int idxSuitableMatch(char ch) {
+    public int getIdxOfPossibleCompleteMatch(char ch) {
 
-        int idx = idxSuitableMatchByRowsAndCols(ch);
-
-        if (idx > -1) {
-
-            return idx;
-
-        } else {
-
-            idx = idxSuitableMatchByDiagonals(ch);
-
-            if (idx > -1) {
-
-                return idx;
-
-            }
-
-        }
-
-        return -1;
-
-    }
-
-    private int idxSuitableMatchByRowsAndCols(char ch) {
-
-        int rowIdxOffset = 1;
-
-        for (int startIdx = 0; startIdx < FIELD_SIZE * FIELD_SIZE; startIdx += FIELD_SIZE) {
-
-            int idx = idxSuitableMatch(startIdx, rowIdxOffset, ch);
-
-            if (idx > -1) {
-
-                return idx;
-
-            }
-
-        }
-
-        for (int startIdx = 0; startIdx < FIELD_SIZE; startIdx++) {
-
-            int idx = idxSuitableMatch(startIdx, FIELD_SIZE, ch);
-
-            if (idx > -1) {
-
-                return idx;
-
-            }
-
-        }
-
-        return -1;
-
-    }
-
-    private int idxSuitableMatchByDiagonals(char ch) {
-
-        int mainDiagStartIdx = 0;
-
-        int mainDiagOffset = 4;
-
-        int idx = idxSuitableMatch(mainDiagStartIdx, mainDiagOffset, ch);
+        int idx = getIdxOfPossibleCompleteMatchByRowsAndCols(ch);
 
         if (idx > -1) {
 
@@ -222,46 +146,71 @@ public class Field {
 
         }
 
-        int sideDiagStartIdx = 2;
-
-        int sideDiagOffset = 2;
-
-        return idxSuitableMatch(sideDiagStartIdx, sideDiagOffset, ch);
+        return getIdxOfPossibleCompleteMatchByDiagonals(ch);
 
     }
 
-    private int idxSuitableMatch(int startIdx, int offset, char ch) {
+    private int getIdxOfPossibleCompleteMatchByRowsAndCols(char ch) {
+
+        int idx = Stream.iterate(0, i -> i + FIELD_SIZE)
+                        .limit(FIELD_SIZE)
+                        .map(i -> getIdxOfPossibleCompleteMatch(i, idxOffsetByRows, ch))
+                        .filter(i -> i > -1)
+                        .findFirst()
+                        .orElse(-1);
+
+        if (idx > -1) {
+
+            return idx;
+
+        }
+
+        return Stream.iterate(0, i -> i + 1)
+                     .limit(FIELD_SIZE)
+                     .map(i -> getIdxOfPossibleCompleteMatch(i, idxOffsetByCols, ch))
+                     .filter(i -> i > -1)
+                     .findFirst()
+                     .orElse(-1);
+
+    }
+
+    private int getIdxOfPossibleCompleteMatchByDiagonals(char ch) {
+
+        int idx = getIdxOfPossibleCompleteMatch(mainDiagStartIdx, mainDiagIdxOffset, ch);
+
+        if (idx > -1) {
+
+            return idx;
+
+        }
+
+        return getIdxOfPossibleCompleteMatch(sideDiagStartIdx, sideDiagIdxOffset, ch);
+
+    }
+
+    private int getIdxOfPossibleCompleteMatch(int startIdx, int idxOffset, char ch) {
 
         if (chars[startIdx] == SPACE &&
-            hasCompleteMatchAfterSetChar(startIdx, startIdx, offset, ch)) {
+            chars[startIdx + idxOffset] == ch &&
+            chars[startIdx + 2 * idxOffset] == ch) {
 
             return startIdx;
 
-        } else if (chars[startIdx + offset] == SPACE &&
-                   hasCompleteMatchAfterSetChar(startIdx + offset, startIdx, offset, ch)) {
+        } else if (chars[startIdx] == ch &&
+                   chars[startIdx + idxOffset] == SPACE &&
+                   chars[startIdx + 2 * idxOffset] == ch) {
 
-            return startIdx + offset;
+            return startIdx + idxOffset;
 
-        } else if (chars[startIdx + offset + offset] == SPACE &&
-                   hasCompleteMatchAfterSetChar(startIdx + offset + offset, startIdx, offset, ch)) {
+        } else if (chars[startIdx] == ch &&
+                   chars[startIdx + idxOffset] == ch &&
+                   chars[startIdx + 2 * idxOffset] == SPACE) {
 
-            return startIdx + offset + offset;
+            return startIdx + 2 * idxOffset;
 
         }
 
         return -1;
-
-    }
-
-    private boolean hasCompleteMatchAfterSetChar(int idxOfChar, int startIdx, int offset, char ch) {
-
-        setChar(idxOfChar, ch);
-
-        boolean isCompleteMatch = isCompleteMatch(startIdx, offset, ch);
-
-        setSpace(idxOfChar);
-
-        return isCompleteMatch;
 
     }
 

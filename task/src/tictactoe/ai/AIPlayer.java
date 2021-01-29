@@ -1,8 +1,10 @@
-package tictactoe.model;
+package tictactoe.ai;
+
+import tictactoe.model.Field;
 
 import java.util.Random;
 
-import static tictactoe.consts.GameConstants.*;
+import static tictactoe.constant.Constants.*;
 
 public class AIPlayer {
 
@@ -30,7 +32,7 @@ public class AIPlayer {
 
     public void moveMediumLevel(Field field, char ch) {
 
-        int idx = field.idxSuitableMatch(ch);
+        int idx = field.getIdxOfPossibleCompleteMatch(ch);
 
         if (idx > -1) {
 
@@ -40,7 +42,7 @@ public class AIPlayer {
 
             ch = oppositeChar(ch);
 
-            if ((idx = field.idxSuitableMatch(ch)) > -1) {
+            if ((idx = field.getIdxOfPossibleCompleteMatch(ch)) > -1) {
 
                 ch = oppositeChar(ch);
 
@@ -62,7 +64,7 @@ public class AIPlayer {
 
         int idx;
 
-        if (field.getFillingLevel() == 0) {
+        if (field.getCurrentLevel() == 0) {
 
             idx = random.nextInt(FIELD_SIZE * FIELD_SIZE);
 

@@ -1,6 +1,6 @@
-package tictactoe.consts;
+package tictactoe.constant;
 
-public class GameConstants {
+public class Constants {
 
     public static final int FIELD_SIZE = 3;
 

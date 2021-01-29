@@ -2,9 +2,9 @@ package tictactoe.controller;
 
 import tictactoe.model.Field;
 import tictactoe.view.View;
-import tictactoe.model.AIPlayer;
+import tictactoe.ai.AIPlayer;
 
-import static tictactoe.consts.GameConstants.*;
+import static tictactoe.constant.Constants.*;
 
 public class TicTacToe {
 
@@ -42,7 +42,7 @@ public class TicTacToe {
 
                 view.printField(field);
 
-                int move = field.getFillingLevel();
+                int move = field.getCurrentLevel();
 
                 while (move <= FIELD_SIZE * FIELD_SIZE) {
 
@@ -80,7 +80,7 @@ public class TicTacToe {
 
                     }
 
-                    move = field.getFillingLevel();
+                    move = field.getCurrentLevel();
 
                 }
 

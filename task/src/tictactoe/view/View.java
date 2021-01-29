@@ -5,7 +5,7 @@ import tictactoe.model.Field;
 import java.util.Arrays;
 import java.util.Scanner;
 
-import static tictactoe.consts.GameConstants.*;
+import static tictactoe.constant.Constants.*;
 
 public class View {
 
