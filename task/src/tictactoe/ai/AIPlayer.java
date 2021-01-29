@@ -32,7 +32,7 @@ public class AIPlayer {
 
     public void moveMediumLevel(Field field, char ch) {
 
-        int idx = field.getIdxOfPossibleCompleteMatch(ch);
+        int idx = field.getIdxOfPossibleMatch(ch);
 
         if (idx > -1) {
 
@@ -42,7 +42,7 @@ public class AIPlayer {
 
             ch = oppositeChar(ch);
 
-            if ((idx = field.getIdxOfPossibleCompleteMatch(ch)) > -1) {
+            if ((idx = field.getIdxOfPossibleMatch(ch)) > -1) {
 
                 ch = oppositeChar(ch);
 

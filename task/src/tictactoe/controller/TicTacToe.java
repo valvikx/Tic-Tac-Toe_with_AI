@@ -1,7 +1,7 @@
 package tictactoe.controller;
 
 import tictactoe.model.Field;
-import tictactoe.view.View;
+import tictactoe.view.Console;
 import tictactoe.ai.AIPlayer;
 
 import static tictactoe.constant.Constants.*;
@@ -14,17 +14,13 @@ public class TicTacToe {
 
     private String oPlayer;
 
-    private final View view;
+    private final Console console = new Console();
 
     private final AIPlayer AIPlayer;
 
-    private final Field field;
+    private final Field field = new Field();
 
     public TicTacToe() {
-
-        field = new Field();
-
-        view = new View();
 
         AIPlayer = new AIPlayer();
 
@@ -32,7 +28,7 @@ public class TicTacToe {
 
     public void run() {
 
-        getParameters();
+        setParams();
 
         if (command.equals(START_COMMAND)) {
 
@@ -40,7 +36,7 @@ public class TicTacToe {
 
                 field.charsInit();
 
-                view.printField(field);
+                console.displayField(field);
 
                 int move = field.getCurrentLevel();
 
@@ -72,7 +68,7 @@ public class TicTacToe {
 
                     }
 
-                    view.printField(field);
+                    console.displayField(field);
 
                     if (isGameOver()) {
 
@@ -84,7 +80,7 @@ public class TicTacToe {
 
                 }
 
-                getParameters();
+                setParams();
 
             }
 
@@ -92,19 +88,15 @@ public class TicTacToe {
 
     }
 
-    private void getParameters() {
+    private void setParams() {
 
-        int numberOfExitParams = 1;
+        String[] params = console.getParams();
 
-        int numberOfStartParams = 3;
-
-        String[] params = view.inputParameters();
-
-        if (params.length == numberOfExitParams) {
+        if (params.length == 1) {
 
             command = params[0];
 
-        } else if (params.length == numberOfStartParams) {
+        } else if (params.length == 3) {
 
             command = params[0];
 
@@ -117,7 +109,7 @@ public class TicTacToe {
 
     private void setAICoordinates(String aiLevel, char ch) {
 
-        view.printAILevel(aiLevel);
+        console.displayAiLevel(aiLevel);
 
         switch (aiLevel) {
 
@@ -142,7 +134,7 @@ public class TicTacToe {
 
     private void setUserCoordinates(char ch) {
 
-        view.enterCoordinates(field, ch);
+        console.setCoordinates(field, ch);
 
     }
 
@@ -154,9 +146,9 @@ public class TicTacToe {
 
         }
 
-        view.printStatus(field.status());
+        console.displayStatus(field.status());
 
-        view.printEmptyLine();
+        console.printEmptyLine();
 
         return true;
 

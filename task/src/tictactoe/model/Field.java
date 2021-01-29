@@ -83,9 +83,9 @@ public class Field {
 
         }
 
-        boolean isWinsX = hasCompleteMatchByRowsAndCols(X) || hasCompleteMatchByDiagonals(X);
+        boolean isWinsX = hasAllMatchByRowsAndCols(X) || hasAllMatchByDiagonals(X);
 
-        boolean isWinsO = hasCompleteMatchByRowsAndCols(O) || hasCompleteMatchByDiagonals(O);
+        boolean isWinsO = hasAllMatchByRowsAndCols(O) || hasAllMatchByDiagonals(O);
 
         if (!isWinsX && !isWinsO && currentLevel == FIELD_SIZE * FIELD_SIZE) {
 
@@ -105,40 +105,9 @@ public class Field {
 
     }
 
-    private boolean hasCompleteMatchByRowsAndCols(char ch) {
+    public int getIdxOfPossibleMatch(char ch) {
 
-        if (Stream.iterate(0, i -> i + FIELD_SIZE)
-                  .limit(FIELD_SIZE)
-                  .allMatch(i -> hasCompleteMatch(i, idxOffsetByRows, ch))) {
-
-            return true;
-
-        }
-
-        return Stream.iterate(0, i -> i + 1)
-                     .limit(FIELD_SIZE)
-                     .allMatch(i -> hasCompleteMatch(i, idxOffsetByCols, ch));
-
-    }
-
-    private boolean hasCompleteMatchByDiagonals(char ch) {
-
-        return hasCompleteMatch(mainDiagStartIdx, mainDiagIdxOffset, ch) ||
-               hasCompleteMatch(sideDiagStartIdx, sideDiagIdxOffset, ch);
-
-    }
-
-    private boolean hasCompleteMatch(int startIdx, int idxOffset, char ch) {
-
-        return chars[startIdx] == ch &&
-               chars[startIdx + idxOffset] == ch &&
-               chars[startIdx + 2 * idxOffset] == ch;
-
-    }
-
-    public int getIdxOfPossibleCompleteMatch(char ch) {
-
-        int idx = getIdxOfPossibleCompleteMatchByRowsAndCols(ch);
+        int idx = getIdxOfPossibleMatchByRowsAndCols(ch);
 
         if (idx > -1) {
 
@@ -146,15 +115,46 @@ public class Field {
 
         }
 
-        return getIdxOfPossibleCompleteMatchByDiagonals(ch);
+        return getIdxOfPossibleMatchByDiagonals(ch);
 
     }
 
-    private int getIdxOfPossibleCompleteMatchByRowsAndCols(char ch) {
+    private boolean hasAllMatchByRowsAndCols(char ch) {
+
+        if (Stream.iterate(0, i -> i + FIELD_SIZE)
+                  .limit(FIELD_SIZE)
+                  .allMatch(i -> hasAllMatch(i, idxOffsetByRows, ch))) {
+
+            return true;
+
+        }
+
+        return Stream.iterate(0, i -> i + 1)
+                     .limit(FIELD_SIZE)
+                     .allMatch(i -> hasAllMatch(i, idxOffsetByCols, ch));
+
+    }
+
+    private boolean hasAllMatchByDiagonals(char ch) {
+
+        return hasAllMatch(mainDiagStartIdx, mainDiagIdxOffset, ch) ||
+               hasAllMatch(sideDiagStartIdx, sideDiagIdxOffset, ch);
+
+    }
+
+    private boolean hasAllMatch(int startIdx, int idxOffset, char ch) {
+
+        return chars[startIdx] == ch &&
+               chars[startIdx + idxOffset] == ch &&
+               chars[startIdx + 2 * idxOffset] == ch;
+
+    }
+
+    private int getIdxOfPossibleMatchByRowsAndCols(char ch) {
 
         int idx = Stream.iterate(0, i -> i + FIELD_SIZE)
                         .limit(FIELD_SIZE)
-                        .map(i -> getIdxOfPossibleCompleteMatch(i, idxOffsetByRows, ch))
+                        .map(i -> getIdx(i, idxOffsetByRows, ch))
                         .filter(i -> i > -1)
                         .findFirst()
                         .orElse(-1);
@@ -167,16 +167,16 @@ public class Field {
 
         return Stream.iterate(0, i -> i + 1)
                      .limit(FIELD_SIZE)
-                     .map(i -> getIdxOfPossibleCompleteMatch(i, idxOffsetByCols, ch))
+                     .map(i -> getIdx(i, idxOffsetByCols, ch))
                      .filter(i -> i > -1)
                      .findFirst()
                      .orElse(-1);
 
     }
 
-    private int getIdxOfPossibleCompleteMatchByDiagonals(char ch) {
+    private int getIdxOfPossibleMatchByDiagonals(char ch) {
 
-        int idx = getIdxOfPossibleCompleteMatch(mainDiagStartIdx, mainDiagIdxOffset, ch);
+        int idx = getIdx(mainDiagStartIdx, mainDiagIdxOffset, ch);
 
         if (idx > -1) {
 
@@ -184,11 +184,11 @@ public class Field {
 
         }
 
-        return getIdxOfPossibleCompleteMatch(sideDiagStartIdx, sideDiagIdxOffset, ch);
+        return getIdx(sideDiagStartIdx, sideDiagIdxOffset, ch);
 
     }
 
-    private int getIdxOfPossibleCompleteMatch(int startIdx, int idxOffset, char ch) {
+    private int getIdx(int startIdx, int idxOffset, char ch) {
 
         if (chars[startIdx] == SPACE &&
             chars[startIdx + idxOffset] == ch &&
