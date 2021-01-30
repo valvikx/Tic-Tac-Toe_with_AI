@@ -1,7 +1,7 @@
 package tictactoe.model;
 
 import java.util.Arrays;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 import static tictactoe.constant.Constants.*;
 
@@ -27,11 +27,11 @@ public class Field {
 
         chars = new char[FIELD_SIZE * FIELD_SIZE];
 
-        charsInit();
+        init();
 
     }
 
-    public void charsInit() {
+    public void init() {
 
         Arrays.fill(chars, SPACE);
 
@@ -73,9 +73,9 @@ public class Field {
 
     }
 
-    public String status() {
+    public String getStatus() {
 
-        int minGameOverLevel = 6;
+        int minGameOverLevel = 5;
 
         if (currentLevel < minGameOverLevel) {
 
@@ -121,17 +121,16 @@ public class Field {
 
     private boolean hasAllMatchByRowsAndCols(char ch) {
 
-        if (Stream.iterate(0, i -> i + FIELD_SIZE)
-                  .limit(FIELD_SIZE)
-                  .allMatch(i -> hasAllMatch(i, idxOffsetByRows, ch))) {
+        if (IntStream.range(0, FIELD_SIZE * FIELD_SIZE)
+                     .filter(i -> i % FIELD_SIZE == 0)
+                     .anyMatch(i -> hasAllMatch(i, idxOffsetByRows, ch))) {
 
             return true;
 
         }
 
-        return Stream.iterate(0, i -> i + 1)
-                     .limit(FIELD_SIZE)
-                     .allMatch(i -> hasAllMatch(i, idxOffsetByCols, ch));
+        return IntStream.range(0, FIELD_SIZE)
+                        .anyMatch(i -> hasAllMatch(i, idxOffsetByCols, ch));
 
     }
 
@@ -152,12 +151,12 @@ public class Field {
 
     private int getIdxOfPossibleMatchByRowsAndCols(char ch) {
 
-        int idx = Stream.iterate(0, i -> i + FIELD_SIZE)
-                        .limit(FIELD_SIZE)
-                        .map(i -> getIdx(i, idxOffsetByRows, ch))
-                        .filter(i -> i > -1)
-                        .findFirst()
-                        .orElse(-1);
+        int idx = IntStream.range(0, FIELD_SIZE * FIELD_SIZE)
+                           .filter(i -> i % FIELD_SIZE == 0)
+                           .map(i -> getIdx(i, idxOffsetByRows, ch))
+                           .filter(i -> i > -1)
+                           .findFirst()
+                           .orElse(-1);
 
         if (idx > -1) {
 
@@ -165,12 +164,11 @@ public class Field {
 
         }
 
-        return Stream.iterate(0, i -> i + 1)
-                     .limit(FIELD_SIZE)
-                     .map(i -> getIdx(i, idxOffsetByCols, ch))
-                     .filter(i -> i > -1)
-                     .findFirst()
-                     .orElse(-1);
+        return IntStream.range(0, FIELD_SIZE)
+                        .map(i -> getIdx(i, idxOffsetByCols, ch))
+                        .filter(i -> i > -1)
+                        .findFirst()
+                        .orElse(-1);
 
     }
 

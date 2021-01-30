@@ -37,7 +37,7 @@ public class Console {
 
     public Console() {
 
-        charsInit();
+        init();
 
     }
 
@@ -69,15 +69,11 @@ public class Console {
 
     }
 
-    public void printEmptyLine() {
-
-        System.out.println();
-
-    }
-
     public void displayStatus(String status) {
 
         System.out.println(status);
+
+        System.out.println();
 
     }
 
@@ -89,18 +85,18 @@ public class Console {
 
     public String[] getParams() {
 
-        String[] params;
+        String[] args;
 
         while (true) {
 
             System.out.print(INPUT_COMMAND);
 
-            params = getArgs(this::isParamValid);
+            args = getArgs(this::isArgValid);
 
-            if (params != null) {
+            if (args != null) {
 
-                if (params[0].equals(EXIT_COMMAND) ||
-                   (params[0].equals(START_COMMAND) && params.length == 3)) {
+                if (args[0].equals(EXIT_COMMAND) ||
+                   (args[0].equals(START_COMMAND) && args.length == 3)) {
 
                     break;
 
@@ -112,7 +108,7 @@ public class Console {
 
         }
 
-        return params;
+        return args;
 
     }
 
@@ -122,18 +118,18 @@ public class Console {
 
             System.out.print(ENTER_COORDINATES);
 
-            String[] coordinates = getArgs(this::isCoordinateDigit);
+            String[] args = getArgs(this::isArgDigit);
 
-            if (coordinates != null) {
+            if (args != null) {
 
-                int[] values = Arrays.stream(coordinates)
+                int[] coordinates = Arrays.stream(args)
                                      .mapToInt(Integer::parseInt)
                                      .filter(this::isCoordinateValid)
                                      .toArray();
 
-                if (values.length == 2) {
+                if (coordinates.length == 2) {
 
-                    int idx = toIdxOfField(values[0], values[1]);
+                    int idx = toIdxOfField(coordinates[0], coordinates[1]);
 
                     if (field.isSpace(idx)) {
 
@@ -161,7 +157,7 @@ public class Console {
 
     }
 
-    private void charsInit() {
+    private void init() {
 
         Arrays.fill(displayedChars, SPACE);
 
@@ -199,13 +195,13 @@ public class Console {
 
     }
 
-    private boolean isParamValid(String param) {
+    private boolean isArgValid(String value) {
 
-        return Arrays.asList(PARAMETERS).contains(param);
+        return Arrays.asList(PARAMETERS).contains(value);
 
     }
 
-    private boolean isCoordinateDigit(String value) {
+    private boolean isArgDigit(String value) {
 
         try {
 

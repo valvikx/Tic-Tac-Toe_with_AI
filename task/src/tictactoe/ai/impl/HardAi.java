@@ -1,82 +1,31 @@
-package tictactoe.ai;
+package tictactoe.ai.impl;
 
+import tictactoe.ai.IAi;
 import tictactoe.model.Field;
 
-import java.util.Random;
 
 import static tictactoe.constant.Constants.*;
 
-public class AIPlayer {
+public class HardAi implements IAi {
 
-    private final Random random;
+    private final EasyAi easyAi = new EasyAi();
 
-    public AIPlayer() {
-
-        random = new Random();
-
-    }
-
-    public void moveEasyLevel(Field field, char ch) {
-
-        int idx = random.nextInt(FIELD_SIZE * FIELD_SIZE);
-
-        while (!field.isSpace(idx)) {
-
-            idx = idx == FIELD_SIZE * FIELD_SIZE - 1 ? 0 : ++idx;
-
-        }
-
-        field.setChar(idx, ch);
-
-    }
-
-    public void moveMediumLevel(Field field, char ch) {
-
-        int idx = field.getIdxOfPossibleMatch(ch);
-
-        if (idx > -1) {
-
-            field.setChar(idx, ch);
-
-        } else {
-
-            ch = oppositeChar(ch);
-
-            if ((idx = field.getIdxOfPossibleMatch(ch)) > -1) {
-
-                ch = oppositeChar(ch);
-
-                field.setChar(idx, ch);
-
-            } else {
-
-                ch = oppositeChar(ch);
-
-                moveEasyLevel(field, ch);
-
-            }
-
-        }
-
-    }
-
-    public void moveHardLevel(Field field, char ch) {
-
-        int idx;
+    @Override
+    public void move(Field field, char ch) {
 
         if (field.getCurrentLevel() == 0) {
 
-            idx = random.nextInt(FIELD_SIZE * FIELD_SIZE);
+            easyAi.move(field, ch);
 
         } else {
 
             HardMove hardMove = doMiniMax(field, ch);
 
-            idx = hardMove.idxBestScore;
+            int idx = hardMove.idxBestScore;
+
+            field.setChar(idx, ch);
 
         }
-
-        field.setChar(idx, ch);
 
     }
 
@@ -86,7 +35,7 @@ public class AIPlayer {
 
         int idxBestScore = -1;
 
-        if (!field.status().equals(GAME_NOT_FINISHED)) {
+        if (!field.getStatus().equals(GAME_NOT_FINISHED)) {
 
             return new HardMove(getScore(field));
 
@@ -117,7 +66,6 @@ public class AIPlayer {
                 }
 
             }
-
 
         } else {
 
@@ -153,11 +101,11 @@ public class AIPlayer {
 
     private int getScore(Field field) {
 
-        if (field.status().equals(X_WINS)) {
+        if (field.getStatus().equals(X_WINS)) {
 
             return 10;
 
-        } else if (field.status().equals(O_WINS)) {
+        } else if (field.getStatus().equals(O_WINS)) {
 
             return -10;
 
@@ -167,14 +115,7 @@ public class AIPlayer {
 
     }
 
-    private char oppositeChar(char ch) {
-
-        return ch == X ? O : X;
-
-    }
-
     private static class HardMove {
-
 
         int bestScore;
 

@@ -1,8 +1,13 @@
 package tictactoe.controller;
 
+import tictactoe.ai.IAi;
+import tictactoe.ai.impl.EasyAi;
+import tictactoe.ai.impl.HardAi;
+import tictactoe.ai.impl.MediumAi;
 import tictactoe.model.Field;
 import tictactoe.view.Console;
-import tictactoe.ai.AIPlayer;
+
+import java.util.Map;
 
 import static tictactoe.constant.Constants.*;
 
@@ -16,13 +21,21 @@ public class TicTacToe {
 
     private final Console console = new Console();
 
-    private final AIPlayer AIPlayer;
+    private final Map<String, IAi> aiPlayer;
 
     private final Field field = new Field();
 
     public TicTacToe() {
 
-        AIPlayer = new AIPlayer();
+        IAi easyAi = new EasyAi();
+
+        IAi mediumAi = new MediumAi();
+
+        IAi hardAi = new HardAi();
+
+        aiPlayer = Map.of(AI_EASY, easyAi,
+                          AI_MEDIUM, mediumAi,
+                          AI_HARD, hardAi);
 
     }
 
@@ -30,59 +43,61 @@ public class TicTacToe {
 
         setParams();
 
-        if (command.equals(START_COMMAND)) {
+        if (command.equals(EXIT_COMMAND)) {
 
-            while (!command.equals(EXIT_COMMAND)) {
+            return;
 
-                field.charsInit();
+        }
 
-                console.displayField(field);
+        while (!command.equals(EXIT_COMMAND)) {
 
-                int move = field.getCurrentLevel();
+            field.init();
 
-                while (move <= FIELD_SIZE * FIELD_SIZE) {
+            console.displayField(field);
 
-                    if (move % 2 == 0) {
+            int move = field.getCurrentLevel();
 
-                        if (xPlayer.equals(USER)) {
+            while (move <= FIELD_SIZE * FIELD_SIZE) {
 
-                            setUserCoordinates(X);
+                if (move % 2 == 0) {
 
-                        } else {
+                    if (xPlayer.equals(USER)) {
 
-                            setAICoordinates(xPlayer, X);
-
-                        }
+                        userMove(X);
 
                     } else {
 
-                        if (oPlayer.equals(USER)) {
-
-                            setUserCoordinates(O);
-
-                        } else {
-
-                            setAICoordinates(oPlayer, O);
-
-                        }
+                        aiMove(xPlayer, X);
 
                     }
 
-                    console.displayField(field);
+                } else {
 
-                    if (isGameOver()) {
+                    if (oPlayer.equals(USER)) {
 
-                        break;
+                        userMove(O);
+
+                    } else {
+
+                        aiMove(oPlayer, O);
 
                     }
-
-                    move = field.getCurrentLevel();
 
                 }
 
-                setParams();
+                console.displayField(field);
+
+                if (isGameOver()) {
+
+                    break;
+
+                }
+
+                move = field.getCurrentLevel();
 
             }
+
+            setParams();
 
         }
 
@@ -107,32 +122,15 @@ public class TicTacToe {
 
     }
 
-    private void setAICoordinates(String aiLevel, char ch) {
+    private void aiMove(String aiLevel, char ch) {
 
         console.displayAiLevel(aiLevel);
 
-        switch (aiLevel) {
-
-            case AI_EASY:
-
-                AIPlayer.moveEasyLevel(field, ch);
-                break;
-
-            case AI_MEDIUM:
-
-                AIPlayer.moveMediumLevel(field, ch);
-                break;
-
-            case AI_HARD:
-
-                AIPlayer.moveHardLevel(field, ch);
-                break;
-
-        }
+        aiPlayer.get(aiLevel).move(field, ch);
 
     }
 
-    private void setUserCoordinates(char ch) {
+    private void userMove(char ch) {
 
         console.setCoordinates(field, ch);
 
@@ -140,15 +138,13 @@ public class TicTacToe {
 
     private boolean isGameOver() {
 
-        if (field.status().equals(GAME_NOT_FINISHED)) {
+        if (field.getStatus().equals(GAME_NOT_FINISHED)) {
 
             return false;
 
         }
 
-        console.displayStatus(field.status());
-
-        console.printEmptyLine();
+        console.displayStatus(field.getStatus());
 
         return true;
 
